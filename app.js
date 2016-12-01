@@ -65,9 +65,19 @@ board.on("ready", function() {
       led.intensity(100);
     }
   }, ]);
+});
 
 
-    //  app.get('/blink1', function(req, res) {
+
+app.set('port', (process.env.PORT || 3000));
+app.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
+});
+
+
+
+
+//  app.get('/blink1', function(req, res) {
     //     led1.blink(100);
     //     res.render('index');
     // })
@@ -97,11 +107,3 @@ board.on("ready", function() {
     //     led2.on();
     //     res.render('index');
     // })
-});
-
-
-
-app.set('port', (process.env.PORT || 3000));
-app.listen(app.get('port'), function() {
-    console.log('Node app is running on port', app.get('port'));
-});
