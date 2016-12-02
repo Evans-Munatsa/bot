@@ -6,7 +6,13 @@ var path = require("path");
 var temporal = require("temporal");
 var board = new five.Board();
 
+
+
 app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+
+
 app.use(bodyParser.urlencoded({
     extended: false
 }));
@@ -28,16 +34,16 @@ board.on("ready", function() {
 
     lightSensor.on("change", function() {
         if (currentRGBColor != ''){
-          //console.log('Sampling ' + currentRGBColor + " : "  + this.level);
+          console.log('Sampling ' + currentRGBColor + " : "  + this.level);
           currentSensorValue = this.level;
         }
     })
         // var led2 = new five.Led(13);
         // led)
 
-    app.get("/", function(req, res) {
-        res.re//nder(x');
-    })
+    // app.get("/", function(req, res) {
+    //     res.re//nder(x');
+    // })
 
 
     // Initialize the RGB LED
@@ -49,9 +55,38 @@ board.on("ready", function() {
     // led.color("#FF0000");
 
 
+    io.on('connection', function(socket){
+      console.log('a user connected');
+      socket.on('chat message', function(msg){
+        console.log('message: ' + msg);
+      });
+
+      
+
+      lightSensor.on("change", function() {
+        //if (currentRGBColor != ''){
+          //console.log('Sampling ' + currentRGBColor + " : "  + this.level);
+          currentSensorValue = this.level;
+          
+          console.log(this.value);
+
+          //if (this.value < 70){
+            socket.emit('yo', this.value);
+          //}
+
+        //}
+    })
+
+
+    });
+
+
     function sampleColor(color, cb){
 
       var readings = {};
+
+      var wait = 2000;
+      var scan = 500;
 
       function read(rgbColor){
 
@@ -62,7 +97,7 @@ board.on("ready", function() {
           },
         },
           {
-            wait: 5000,
+            wait: wait,
             task: function() {
                 currentRGBColor = rgbColor;
                 console.log(rgbColor)//;
@@ -70,7 +105,7 @@ board.on("ready", function() {
                 led.intensity(100);
             }
         },{
-            wait: 1000,
+            wait: scan,
             task: function() {
                 currentRGBColor = rgbColor;
                 readings[rgbColor] = currentSensorValue;
@@ -78,14 +113,14 @@ board.on("ready", function() {
         },
 
         {
-            wait: 1000,
+            wait: scan,
             task: function() {
                 currentRGBColor = rgbColor;
                 readings[rgbColor] = (readings[rgbColor] + currentSensorValue)/2;
             }
         },
         {
-            wait: 1000,
+            wait: scan,
             task: function() {
                 currentRGBColor = rgbColor;
                 readings[rgbColor] = (readings[rgbColor] + currentSensorValue)/2;
@@ -101,7 +136,7 @@ board.on("ready", function() {
       queue = queue.concat(read('blue'))
 
       queue.push({
-          wait: 1000,
+          wait: scan,
           task: function() {
               //currentRGBColor = rgbColor;
               //readings[color] = (readings[color] + currentSensorValue)/2;
@@ -131,7 +166,22 @@ board.on("ready", function() {
     });
 
     temporal.queue(colorQueue)
+   
 
+   function calibrateValue(){
+     // diff = calibrateValue['red'] - calibrateValue['white'];
+   }
+
+
+  app.set('port', (process.env.PORT || 3000));
+  http.listen(app.get('port'), function() {
+    console.log('Node app is running on port', app.get('port'));
+  });
+
+  app.get('/' , (req, res, next) => res.render('index'))
+
+   // calibrateValue(sampleColor)
+   // console.log("this is" + calibrateValue)
 
   // console.log("Quick show me white!");
   // sampleColor('white', function(err, whiteData){
@@ -213,7 +263,3 @@ board.on("ready", function() {
 
 
 
-app.set('port', (process.env.PORT || 3000));
-app.listen(app.get('port'), function() {
-    console.log('Node app is running on port', app.get('port'));
-});

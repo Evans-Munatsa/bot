@@ -1,13 +1,30 @@
+<script src="/socket.io/socket.io.js"></script>
+
 <div class="row">
-	<h1>Lights Controller</h1>
-	<div class="thumbnail">
-		<a href="/on1" class="btn btn-success">on1</a>
-		<a href="/blink1" class="btn btn-info">Blink1</a>
-		<a href="/off1" class="btn btn-danger">off1</a>
-	</div>
-	<div class="thumbnail">
-		<a href="/on2" class="btn btn-success">on2</a>
-		<a href="/blink2" class="btn btn-info">Blink2</a>
-		<a href="/off2" class="btn btn-danger">off2</a>
+	<div class="block">
+
 	</div>
 </div>
+
+<script type="text/javascript">
+	  var socket = io();
+
+	// setInterval(function(){
+
+	// 	socket.emit('chat message', 'oi');
+	// }, 1000);
+	var block = document.querySelector('.block');
+	socket.on('yo', function(msg){
+
+		block.innerHTML = msg;
+
+		if (Number(msg) > 700){
+			block.style.background = 'blue'
+		}
+		else{
+			block.style.background = 'red'	
+		}
+
+	});
+
+</script>
